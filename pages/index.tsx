@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { NextPage } from "next";
 import SearchCard from "@/components/Search";
+import TaskMenu from "@/components/TaskMenu";
+import InboxMenu from "@/components/InboxMenu";
 import Image from "next/image";
 
 const Home: NextPage = () => {
@@ -28,25 +30,8 @@ const Home: NextPage = () => {
       {/* Menu Task dan Inbox */}
       {showMenu && (
         <div className="fixed bottom-4 right-[5.5rem] flex space-x-4">
-          <div className="flex flex-col items-center cursor-pointer">
-            <span className="text-white mb-1">Task</span>
-            <Image
-              src="/assets/task.png"
-              alt="Task Icon"
-              width={50}
-              height={50}
-            />
-          </div>
-
-          <div className="flex flex-col items-center cursor-pointer">
-            <span className="text-white mb-1">Inbox</span>
-            <Image
-              src="/assets/inbox.png"
-              alt="Inbox Icon"
-              width={50}
-              height={50}
-            />
-          </div>
+          <TaskMenu />
+          <InboxMenu />
         </div>
       )}
     </div>
