@@ -19,7 +19,7 @@ const TaskMenu: React.FC = () => {
     <div className="relative flex flex-col items-center cursor-pointer">
       <span className="text-white mb-1">Task</span>
       <Image
-        src="/assets/task.png"
+        src={showWidget ? "/assets/task-open.png" : "/assets/task.png"}
         alt="Task Icon"
         width={50}
         height={50}

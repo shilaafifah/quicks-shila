@@ -14,7 +14,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#4F4F4F] p-4">
+    <div className="relative min-h-screen bg-[#333333] p-4">
       <SearchCard />
       <h1 className="text-2xl font-bold mt-4 mb-4 text-white">
         Selamat datang, Shila

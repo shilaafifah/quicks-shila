@@ -191,7 +191,7 @@ const InboxMenu: React.FC = () => {
     <div className="relative flex flex-col items-center cursor-pointer">
       <span className="text-white mb-1">Inbox</span>
       <Image
-        src="/assets/inbox.png"
+        src={showWidget ? "/assets/inbox-open.png" : "/assets/inbox.png"}
         alt="Inbox Icon"
         width={50}
         height={50}
