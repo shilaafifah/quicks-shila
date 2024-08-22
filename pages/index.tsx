@@ -4,6 +4,7 @@ import SearchCard from "@/components/Search";
 import TaskMenu from "@/components/TaskMenu";
 import InboxMenu from "@/components/InboxMenu";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -27,12 +28,16 @@ const Home: NextPage = () => {
         <Image src="/assets/menu.png" alt="Menu Icon" width={50} height={50} />
       </div>
 
-      {/* Menu Task dan Inbox */}
       {showMenu && (
-        <div className="fixed bottom-4 right-[5.5rem] flex space-x-4">
+        <motion.div
+          className="fixed bottom-4 right-[5.5rem] flex space-x-4"
+          initial={{ x: 70, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
           <TaskMenu />
           <InboxMenu />
-        </div>
+        </motion.div>
       )}
     </div>
   );

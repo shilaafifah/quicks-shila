@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 const TaskMenu: React.FC = () => {
@@ -6,6 +7,12 @@ const TaskMenu: React.FC = () => {
 
   const toggleWidget = () => {
     setShowWidget((prevShowWidget) => !prevShowWidget);
+  };
+
+  const widgetVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.8 },
   };
 
   return (
@@ -19,7 +26,14 @@ const TaskMenu: React.FC = () => {
         onClick={toggleWidget}
       />
       {showWidget && (
-        <div className="absolute top-[-484px] right-0 w-[500px] h-[500px] bg-white shadow-md rounded-lg overflow-hidden">
+        <motion.div
+          className="absolute top-[-484px] right-0 w-[500px] h-[500px] bg-white shadow-md rounded-lg overflow-hidden"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={widgetVariants}
+          transition={{ duration: 0.3 }}
+        >
           {/* Header Widget */}
           <div className="flex justify-between items-center p-3">
             <select className="p-2 border border-gray-300 rounded-md">
@@ -54,7 +68,7 @@ const TaskMenu: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
