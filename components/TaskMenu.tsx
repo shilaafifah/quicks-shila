@@ -1,12 +1,31 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 const TaskMenu: React.FC = () => {
   const [showWidget, setShowWidget] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("My Tasks");
+
+  const options = [
+    "My Tasks",
+    "Personal Errands",
+    "Urgent To-Do",
+  ];
 
   const toggleWidget = () => {
     setShowWidget((prevShowWidget) => !prevShowWidget);
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown((prevShowDropdown) => !prevShowDropdown);
+  };
+
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option);
+    setShowDropdown(false);
   };
 
   const widgetVariants = {
@@ -14,6 +33,9 @@ const TaskMenu: React.FC = () => {
     visible: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 0.8 },
   };
+
+  // Filter out the selected option from the list
+  const filteredOptions = options.filter(option => option !== selectedOption);
 
   return (
     <div className="relative flex flex-col items-center cursor-pointer">
@@ -36,9 +58,34 @@ const TaskMenu: React.FC = () => {
         >
           {/* Header Widget */}
           <div className="flex justify-between items-center p-3">
-            <select className="p-2 border border-gray-300 rounded-md">
-              <option>My Tasks</option>
-            </select>
+            {/* Custom Dropdown */}
+            <div className="relative">
+              <button
+                onClick={toggleDropdown}
+                className="p-2 border border-gray-300 rounded-md w-40 text-left flex items-center justify-between"
+              >
+                {selectedOption}
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {showDropdown && (
+                <div className="absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10">
+                  <ul className="divide-y divide-gray-300">
+                    {filteredOptions.map(option => (
+                      <li
+                        key={option}
+                        className="p-2 cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleOptionSelect(option)}
+                      >
+                        {option}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <button className="p-2 bg-blue-500 text-white rounded-md">
               New Task
             </button>
