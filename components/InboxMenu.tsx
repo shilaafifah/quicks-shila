@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios"; // Tambahkan import axios
 
 interface Inbox {
   id: number;
@@ -28,8 +29,15 @@ const InboxMenu: React.FC = () => {
   const [editMessageIndex, setEditMessageIndex] = useState<number | null>(null);
   const [editMessageText, setEditMessageText] = useState<string>("");
   const [contextMenuIndex, setContextMenuIndex] = useState<number | null>(null);
+  const [inboxes, setInboxes] = useState<Inbox[]>([]);
 
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const widgetVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.8 },
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,6 +56,29 @@ const InboxMenu: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchInboxes = async () => {
+      try {
+        const response = await axios.get(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        const inboxesData = response.data.map((user: any) => ({
+          id: user.id,
+          sender: user.name,
+          profilePic: "/assets/profile.png",
+          dateTime: new Date().toISOString(),
+          message: "Pesan terbaru dari " + user.name,
+          type: "individual",
+        }));
+        setInboxes(inboxesData);
+      } catch (error) {
+        console.error("Error fetching inboxes:", error);
+      }
+    };
+
+    fetchInboxes();
+  }, []);
+
   const toggleWidget = () => {
     setShowWidget((prevShowWidget) => !prevShowWidget);
     setSelectedInbox(null);
@@ -56,69 +87,21 @@ const InboxMenu: React.FC = () => {
     setContextMenuIndex(null);
   };
 
-  const inboxes: Inbox[] = [
-    {
-      id: 1,
-      sender: "JavaScript Lovers",
-      profilePic: "/assets/profile.png",
-      dateTime: "2024-08-21 14:30",
-      message: "Pesan dari Shila.",
-      participants: 3,
-      lastMessageSender: "Shila Afifah",
-      type: "group",
-    },
-    {
-      id: 2,
-      sender: "Shila Afifah",
-      profilePic: "/assets/profile2.png",
-      dateTime: "2024-08-21 13:15",
-      message: "Ini pesan dari Shila.",
-      type: "individual",
-    },
-  ];
-
-  const widgetVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 },
-  };
-
-  const handleInboxClick = (inbox: Inbox) => {
+  const handleInboxClick = async (inbox: Inbox) => {
     setSelectedInbox(inbox);
 
-    if (inbox.type === "group") {
-      // pesan grup
-      setChatMessages([
-        {
-          sender: "Taufik Steven",
-          message: "Pesan dari Taufik.",
-          dateTime: "2024-08-21 14:00",
-        },
-        {
-          sender: "You",
-          message: "Pesan balasan dari penerima.",
-          dateTime: "2024-08-21 14:15",
-        },
-        {
-          sender: "Shila Afifah",
-          message: "Pesan dari Shila.",
-          dateTime: "2024-08-21 14:30",
-        },
-      ]);
-    } else {
-      // pesan individu
-      setChatMessages([
-        {
-          sender: "You",
-          message: "Ini pesan dari penerima",
-          dateTime: "2024-08-21 13:15",
-        },
-        {
-          sender: "Shila Afifah",
-          message: "Ini pesan dari Shila.",
-          dateTime: "2024-08-21 13:30",
-        },
-      ]);
+    try {
+      const response = await axios.get(
+        `https://jsonplaceholder.typicode.com/comments?postId=${inbox.id}`
+      );
+      const chatMessagesData = response.data.map((comment: any) => ({
+        sender: comment.name,
+        message: comment.body,
+        dateTime: new Date().toISOString(),
+      }));
+      setChatMessages(chatMessagesData);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
     }
 
     setEditMessageIndex(null);
@@ -228,7 +211,6 @@ const InboxMenu: React.FC = () => {
                 </div>
               </div>
               <hr className="border-t border-gray-300 mb-4" />
-              {/* Daftar Pesan */}
               <div className="flex-1 overflow-y-auto mb-4">
                 {chatMessages.map((msg, index) => (
                   <div
@@ -240,7 +222,6 @@ const InboxMenu: React.FC = () => {
                       }
                     }}
                   >
-                    {/* Tampilkan Tanggal Jika Ini Pesan Pertama pada Tanggal Tersebut */}
                     {index === 0 ||
                     formatDate(chatMessages[index - 1].dateTime) !==
                       formatDate(msg.dateTime) ? (
@@ -280,7 +261,6 @@ const InboxMenu: React.FC = () => {
                         >
                           {msg.message}
 
-                          {/* menu edit dan delete */}
                           {contextMenuIndex === index && (
                             <div
                               ref={contextMenuRef}
@@ -352,7 +332,7 @@ const InboxMenu: React.FC = () => {
                 />
               </div>
               <div className="p-4 h-full overflow-y-auto">
-                {inboxes.map((inbox) => (
+                {inboxes.map((inbox: Inbox) => (
                   <div
                     key={inbox.id}
                     className="mb-4 border-b border-gray-400 pb-4 cursor-pointer"
@@ -397,5 +377,4 @@ const InboxMenu: React.FC = () => {
     </div>
   );
 };
-
 export default InboxMenu;
