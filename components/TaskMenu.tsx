@@ -1,14 +1,22 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
-  faPencilAlt,
-  faClock,
   faChevronUp,
   faEllipsisH,
+  faClock,
+  faPencilAlt,
 } from "@fortawesome/free-solid-svg-icons";
+
+interface Task {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
 const TaskMenu: React.FC = () => {
   const [showWidget, setShowWidget] = useState(false);
@@ -17,42 +25,39 @@ const TaskMenu: React.FC = () => {
   const [taskDate, setTaskDate] = useState<string>("");
   const [tasks, setTasks] = useState<
     { title: string; date: string; description: string }[]
-  >([
-    {
-      title: "Scaling Aplikasi Web: Tantangan dan Solusi",
-      date: "",
-      description:
-        "Pendalaman tentang tantangan yang dihadapi saat scaling aplikasi web dan strategi untuk mengatasi hambatan ini.",
-    },
-    {
-      title: "Optimasi Performa Aplikasi Web",
-      date: "",
-      description:
-        "Menganalisis dan mengoptimalkan performa aplikasi web dengan meminimalkan waktu muat, mengurangi ukuran bundle, dan meningkatkan pengalaman pengguna secara keseluruhan.",
-    },
-    {
-      title: "Integrasi API Pihak Ketiga untuk Payment Gateway",
-      date: "",
-      description:
-        "Mengimplementasikan dan menguji integrasi API payment gateway pihak ketiga ke dalam aplikasi web, memastikan pemrosesan transaksi yang aman dan efisien.",
-    },
-  ]);
+  >([]);
   const [openTaskIndex, setOpenTaskIndex] = useState<number | null>(null);
-  const [completedTasks, setCompletedTasks] = useState<boolean[]>(
-    Array(tasks.length).fill(false)
-  );
-  const [taskDates, setTaskDates] = useState<string[]>(
-    Array(tasks.length).fill("")
-  );
-  const [editingIndex, setEditingIndex] = useState<number | null>(null); // Menyimpan index task yang sedang diedit
-  const [editedDescription, setEditedDescription] = useState<string>(""); // Menyimpan deskripsi yang diedit
+  const [completedTasks, setCompletedTasks] = useState<boolean[]>([]);
+  const [taskDates, setTaskDates] = useState<string[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editedDescription, setEditedDescription] = useState<string>("");
   const [newTaskTitle, setNewTaskTitle] = useState<string>("Type Task Title");
   const [newTaskDate, setNewTaskDate] = useState<string>("");
   const [newTaskDescription, setNewTaskDescription] =
     useState<string>("No Description");
-  const [showDeleteMenu, setShowDeleteMenu] = useState<number | null>(null); // Menyimpan index task yang menampilkan menu delete
+  const [showDeleteMenu, setShowDeleteMenu] = useState<number | null>(null);
 
   const options = ["My Tasks", "Personal Errands", "Urgent To-Do"];
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get<Task[]>('https://jsonplaceholder.typicode.com/todos');
+        const tasksData = response.data.slice(0, 3).map((task: Task) => ({
+          title: task.title,
+          date: "",
+          description: "Deskripsi untuk " + task.title,
+        }));
+        setTasks(tasksData);
+        setCompletedTasks(Array(tasksData.length).fill(false));
+        setTaskDates(Array(tasksData.length).fill(""));
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchTasks();
+  }, []);
 
   const toggleWidget = () => {
     setShowWidget((prevShowWidget) => !prevShowWidget);
@@ -78,8 +83,8 @@ const TaskMenu: React.FC = () => {
       date: newTaskDate,
       description: newTaskDescription,
     };
-    setTasks((prevTasks) => [...prevTasks, newTask]); // Menambahkan task baru ke daftar
-    setNewTaskTitle("Type Task Title"); // default judul task baru
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+    setNewTaskTitle("Type Task Title");
     setNewTaskDate("");
     setNewTaskDescription("No Description");
   };
@@ -115,7 +120,7 @@ const TaskMenu: React.FC = () => {
           <div className="flex justify-between items-center p-3">
             <div className="relative">
               <div className="flex items-center">
-                {taskDate && ( // menampilkan tanggal yang sudah dipilih
+                {taskDate && (
                   <span className="mr-2 text-gray-600">{taskDate}</span>
                 )}
                 <button
@@ -163,13 +168,13 @@ const TaskMenu: React.FC = () => {
                   className="flex items-center justify-between cursor-pointer p-2"
                   onClick={() =>
                     setOpenTaskIndex(openTaskIndex === index ? null : index)
-                  } // Toggle task
+                  }
                 >
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       className="w-4 h-4 border-gray-500"
-                      checked={completedTasks[index]} // Mengatur status ceklis
+                      checked={completedTasks[index]}
                       onChange={() => {
                         const updatedCompletedTasks = [...completedTasks];
                         updatedCompletedTasks[index] =
@@ -184,12 +189,12 @@ const TaskMenu: React.FC = () => {
                         value={task.title}
                         onChange={(e) => {
                           const updatedTasks = [...tasks];
-                          updatedTasks[index].title = e.target.value; // memperbarui judul task
+                          updatedTasks[index].title = e.target.value;
                           setTasks(updatedTasks);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
-                            setEditingIndex(null); // keluar dari mode edit
+                            setEditingIndex(null);
                           }
                         }}
                       />
@@ -198,7 +203,7 @@ const TaskMenu: React.FC = () => {
                         className={`text-gray-700 font-semibold ml-3 ${
                           completedTasks[index] ? "line-through" : ""
                         }`}
-                        onClick={() => setEditingIndex(index)} // mengedit langsung saat judul diklik
+                        onClick={() => setEditingIndex(index)}
                       >
                         {task.title}
                       </h3>
@@ -207,8 +212,7 @@ const TaskMenu: React.FC = () => {
                   <div className="flex items-center">
                     <span className="mr-2 text-gray-600">
                       {taskDates[index]}
-                    </span>{" "}
-                    {/* menampilkan tanggal jika sudah dipilih */}
+                    </span>
                     <FontAwesomeIcon
                       icon={
                         openTaskIndex === index ? faChevronDown : faChevronUp
@@ -241,7 +245,7 @@ const TaskMenu: React.FC = () => {
                               (_, i) => i !== index
                             );
                             setTaskDates(updatedTaskDates);
-                            setShowDeleteMenu(null); // menyembunyikan menu setelah menghapus
+                            setShowDeleteMenu(null);
                           }}
                         >
                           Delete
@@ -277,14 +281,14 @@ const TaskMenu: React.FC = () => {
                           type="text"
                           className="p-1 border border-gray-300 rounded-md"
                           value={editedDescription}
-                          onChange={(e) => setEditedDescription(e.target.value)} // memperbarui deskripsi yang diedit
+                          onChange={(e) => setEditedDescription(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               const updatedTasks = [...tasks];
                               updatedTasks[index].description =
-                                editedDescription; // menyimpan deskripsi yang diedit
+                                editedDescription;
                               setTasks(updatedTasks);
-                              setEditingIndex(null); // keluar dari mode edit
+                              setEditingIndex(null);
                             }
                           }}
                         />
@@ -293,11 +297,11 @@ const TaskMenu: React.FC = () => {
                           <FontAwesomeIcon
                             icon={faPencilAlt}
                             className="text-blue-400 mr-2"
-                            onClick={() => handleEditDescription(index)} // memanggil fungsi edit
+                            onClick={() => handleEditDescription(index)}
                           />
                           <span className="text-gray-600">
                             {task.description}
-                          </span>{" "}
+                          </span>
                         </>
                       )}
                     </div>
